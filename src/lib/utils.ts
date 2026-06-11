@@ -144,9 +144,9 @@ export function translateTeamLabel(label?: string): string {
 export function getFlagEmoji(iso2: string): string {
   if (!iso2) return "🏳️";
   const code = iso2.toUpperCase();
-  if (code === "ENG") return "🏴󠁧󠁢󠁥󠁮󠁧󠁿";
-  if (code === "SCO") return "🏴󠁧󠁢󠁳󠁣󠁴󠁿";
-  if (code === "WAL") return "🏴󠁧󠁢󠁷󠁬󠁳󠁿";
+  // England/Scotland/Wales use Unicode tag sequences that Windows renders
+  // as a plain black flag; the Union Jack degrades gracefully everywhere
+  if (code === "ENG" || code === "SCO" || code === "WAL") return "🇬🇧";
   if (code.length !== 2) return "🏳️";
   const codePoints = code
     .split('')

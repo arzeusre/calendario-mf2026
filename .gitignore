@@ -45,3 +45,6 @@ src/data/matches-live.json
 
 # verification artifacts
 /verification-screenshots/
+
+# evidencias de pruebas locales
+/pruebas/

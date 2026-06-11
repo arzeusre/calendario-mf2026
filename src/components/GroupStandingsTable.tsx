@@ -45,7 +45,7 @@ export default function GroupStandingsTable({ group, teams, matches, onSelectTea
                   <button
                     type="button"
                     className={styles.teamNameLink}
-                    style={{ background: 'none', border: 'none', font: 'inherit', fontWeight: 600, color: 'inherit', padding: 0 }}
+                    style={{ background: 'none', border: 'none', font: 'inherit', fontWeight: 600, color: 'inherit', padding: 0, textAlign: 'left' }}
                     onClick={() => onSelectTeam(std.team.id)}
                     title={`Ver partidos de ${TEAM_NAMES_ES[std.team.name_en] || std.team.name_en}`}
                   >

@@ -3,7 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import {
   Bell, Calendar, CalendarPlus, Check, ChevronDown, Copy, Download,
-  Globe, Link2, RefreshCw, SlidersHorizontal, Trash2, Wrench
+  Globe, Link2, RefreshCw, SlidersHorizontal, Smartphone, Trash2, Wrench
 } from 'lucide-react';
 import { Team, Stadium, TEAM_NAMES_ES, CITY_NAMES_ES } from '@/lib/utils';
 import { TV_REGIONS } from '@/lib/constants';
@@ -300,6 +300,37 @@ export default function SubscriptionPanel({
             <Download size={16} aria-hidden="true" /> Descargar archivo .ics
           </a>
         </div>
+
+        {/* Google URL-subscriptions don't sync to phones by default — walk
+            the user through it instead of letting them think it's broken */}
+        <details className={styles.helpBox}>
+          <summary className={styles.helpSummary}>
+            <Smartphone size={15} aria-hidden="true" /> ¿No aparece el calendario en tu móvil?
+          </summary>
+          <div className={styles.helpContent}>
+            <p>
+              <strong>Google Calendar</strong> añade los calendarios por URL solo en su versión web,
+              y <strong>no los sincroniza al móvil automáticamente</strong>. Tras añadirlo desde un
+              ordenador, actívalo en tu teléfono:
+            </p>
+            <ol>
+              <li>Abre la app de <strong>Google Calendar</strong> en el móvil.</li>
+              <li>Menú ☰ → <strong>Ajustes</strong>.</li>
+              <li>Toca <strong>«Mundial de Fútbol 2026»</strong> (bajo tu cuenta).</li>
+              <li>Activa <strong>Sincronización</strong>.</li>
+            </ol>
+            <p>
+              El botón «Añadir a Google Calendar» desde el móvil abre la versión web de Google
+              (limitación de Google, la app no admite suscripciones por URL). Hazlo una vez y
+              luego activa la sincronización como arriba.
+            </p>
+            <p>
+              Google actualiza los calendarios por URL <strong>cada 8-24 horas</strong>. Para
+              actualizaciones cada hora usa <strong>Apple Calendar</strong> u <strong>Outlook</strong>,
+              que respetan la frecuencia del feed.
+            </p>
+          </div>
+        </details>
       </div>
 
       {/* Simulator Panel (development / explicitly enabled only) */}

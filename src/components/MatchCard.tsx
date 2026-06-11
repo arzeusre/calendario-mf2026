@@ -34,11 +34,11 @@ export default function MatchCard({
   const matchGroupColor = GROUP_COLORS[match.group] || 'hsl(var(--accent))';
   const leftBorderColor = match.type === 'group' ? matchGroupColor : 'var(--wc-gold)';
 
-  const teamButton = (team: Team | undefined, label: string) =>
+  const teamButton = (team: Team | undefined, label: string, side: 'home' | 'away') =>
     team ? (
       <button
         type="button"
-        className={`${styles.teamName} ${styles.teamNameLink}`}
+        className={`${styles.teamName} ${styles.teamNameLink} ${side === 'home' ? styles.teamNameHome : styles.teamNameAway}`}
         style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', fontWeight: 700, color: 'var(--text-main)', cursor: 'pointer' }}
         onClick={() => onSelectTeam(team.id)}
         title={`Filtrar partidos de ${label}`}
@@ -46,7 +46,7 @@ export default function MatchCard({
         {label}
       </button>
     ) : (
-      <span className={styles.teamName}>{label}</span>
+      <span className={`${styles.teamName} ${side === 'home' ? styles.teamNameHome : styles.teamNameAway}`}>{label}</span>
     );
 
   const flagImg = (team: Team | undefined) =>
@@ -100,7 +100,7 @@ export default function MatchCard({
         {/* Scoreboard */}
         <div className={styles.matchTeams}>
           <div className={`${styles.team} ${styles.homeTeam}`}>
-            {teamButton(homeTeam, homeLabelName)}
+            {teamButton(homeTeam, homeLabelName, 'home')}
             {flagImg(homeTeam)}
           </div>
 
@@ -118,7 +118,7 @@ export default function MatchCard({
 
           <div className={`${styles.team} ${styles.awayTeam}`}>
             {flagImg(awayTeam)}
-            {teamButton(awayTeam, awayLabelName)}
+            {teamButton(awayTeam, awayLabelName, 'away')}
           </div>
         </div>
 
