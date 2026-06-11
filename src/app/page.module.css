@@ -159,6 +159,14 @@
   .contentArea:hover::-webkit-scrollbar-thumb {
     background: var(--card-border-hover);
   }
+
+  /* Keep the filter tabs pinned while the fixture scrolls beneath */
+  .tabs {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--background);
+  }
 }
 
 @media (max-width: 1024px) {
@@ -447,6 +455,13 @@
   gap: 1.5rem;
 }
 
+/* The column is height-capped on desktop for smart scrolling; without
+   this, flex children (the tab strip!) shrink to fit instead of letting
+   the container scroll */
+.contentArea > * {
+  flex-shrink: 0;
+}
+
 .tabs {
   display: flex;
   gap: 0.25rem;
@@ -515,6 +530,10 @@
 .matchesCount {
   font-size: 0.875rem;
   color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
 .matchesList {
