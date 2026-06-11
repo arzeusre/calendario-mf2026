@@ -339,20 +339,21 @@ export default function SubscriptionPanel({
                 todos los calendarios, y <strong>márcalo</strong> para hacerlo visible.
               </li>
               <li>
-                Por último, en <strong>☰ → Ajustes → «Mundial de Fútbol 2026»</strong> (bajo tu
-                cuenta), comprueba que <strong>«Sincronización»</strong> esté activada — así los
-                partidos se mantendrán actualizados aunque cierres la app.
+                En <strong>☰ → Ajustes → «Mundial de Fútbol 2026»</strong> (bajo tu cuenta),
+                comprueba que <strong>«Sincronización»</strong> esté activada — así los partidos se
+                mantendrán actualizados aunque cierres la app.
+              </li>
+              <li>
+                <strong>🔔 Activa los recordatorios:</strong> Google ignora las alertas incluidas en
+                los calendarios por URL, así que configúralas una sola vez: en{' '}
+                <a href="https://calendar.google.com" target="_blank" rel="noreferrer">calendar.google.com</a>{' '}
+                → ⚙️ <strong>Configuración</strong> → <strong>«Mundial de Fútbol 2026»</strong> (bajo
+                «Configuración de otros calendarios») → <strong>Notificaciones de eventos</strong> →
+                «Añadir notificación» y elige los minutos de antelación. Se aplicará a todos los
+                partidos, también en el móvil. <em>(En Apple Calendar y Outlook las alertas del feed
+                funcionan sin pasos extra.)</em>
               </li>
             </ol>
-            <p>
-              <strong>🔔 Recordatorios en Google:</strong> Google ignora las alertas incluidas en los
-              calendarios por URL. Para recibir notificaciones, en{' '}
-              <a href="https://calendar.google.com" target="_blank" rel="noreferrer">calendar.google.com</a>{' '}
-              → ⚙️ Configuración → <strong>«Mundial de Fútbol 2026»</strong> (bajo «Configuración de
-              otros calendarios») → <strong>Notificaciones de eventos</strong> → «Añadir notificación».
-              Se aplicará a todos los partidos, también en el móvil. En Apple Calendar y Outlook las
-              alertas del feed funcionan sin pasos extra.
-            </p>
             <p>
               La primera descarga de los partidos puede tardar <strong>unos minutos</strong>. Google
               actualiza los calendarios por URL <strong>cada 8-24 horas</strong>; para actualizaciones
