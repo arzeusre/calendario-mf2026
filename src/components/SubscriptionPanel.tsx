@@ -74,7 +74,10 @@ export default function SubscriptionPanel({
   const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
   const calendarHttpUrl = `${origin}/api/calendar${queryString}`;
   const calendarWebcalUrl = calendarHttpUrl.replace(/^https?:\/\//i, 'webcal://');
-  const googleCalendarUrl = `https://calendar.google.com/calendar/render?cid=${encodeURIComponent(calendarWebcalUrl)}`;
+  // Google's "add by URL" settings page (web). The classic render?cid= link
+  // gets hijacked by the mobile app, which can't subscribe URL calendars and
+  // fails silently; this page always opens the web flow and prefills the URL
+  const googleCalendarUrl = `https://calendar.google.com/calendar/u/0/r/settings/addbyurl?cid=${encodeURIComponent(calendarHttpUrl)}`;
 
   const handleCopyUrl = async () => {
     try {
@@ -309,28 +312,34 @@ export default function SubscriptionPanel({
           </summary>
           <div className={styles.helpContent}>
             <p>
-              Al pulsar «Añadir a Google Calendar», Google lo agrega a tu cuenta pero lo deja
-              <strong> oculto y sin sincronizar</strong> en el móvil — aunque diga «agregado
-              correctamente», no lo verás hasta activarlo:
+              Google solo admite calendarios por URL desde su <strong>versión web</strong>, y además
+              <strong> no los sincroniza al móvil</strong> hasta que tú lo actives. Sigue estos 3 pasos:
             </p>
             <ol>
-              <li>Abre la app de <strong>Google Calendar</strong>.</li>
-              <li>Menú ☰ → <strong>Ajustes</strong>.</li>
-              <li>Bajo tu cuenta de Google, toca <strong>«Mundial de Fútbol 2026»</strong> (si no
-                aparece, toca <strong>Mostrar más</strong>).</li>
-              <li>Activa <strong>Sincronización</strong>.</li>
-              <li>Vuelve al calendario: marca también el calendario como visible en el menú ☰.</li>
+              <li>
+                Pulsa <strong>«Añadir a Google Calendar»</strong>: se abre la página web de Google con
+                la URL ya rellenada; toca <strong>«Añadir calendario»</strong>. Comprueba arriba que
+                estás en la cuenta correcta. <em>(Si en su lugar se abre la app del teléfono pidiendo
+                elegir cuenta, cancela: esa vía de Google falla en silencio; abre el enlace en el
+                navegador.)</em>
+              </li>
+              <li>
+                Activa la sincronización al móvil: entra a{' '}
+                <a href="https://calendar.google.com/calendar/syncselect" target="_blank" rel="noreferrer">
+                  calendar.google.com/calendar/syncselect
+                </a>
+                , marca <strong>«Mundial de Fútbol 2026»</strong> y pulsa <strong>Guardar</strong>.
+              </li>
+              <li>
+                Abre la app de Google Calendar y desliza hacia abajo para refrescar. El calendario
+                aparecerá en el menú ☰ — márcalo como visible si no lo está.
+              </li>
             </ol>
             <p>
-              La primera vez, Google puede tardar <strong>unos minutos</strong> en descargar los
-              partidos. Puedes comprobar que está añadido entrando a{' '}
-              <a href="https://calendar.google.com" target="_blank" rel="noreferrer">calendar.google.com</a>{' '}
-              → «Otros calendarios».
-            </p>
-            <p>
-              Google actualiza los calendarios por URL <strong>cada 8-24 horas</strong>. Para
-              actualizaciones cada hora usa <strong>Apple Calendar</strong> u <strong>Outlook</strong>,
-              que respetan la frecuencia del feed.
+              La primera descarga de los partidos puede tardar <strong>unos minutos</strong>. Google
+              actualiza los calendarios por URL <strong>cada 8-24 horas</strong>; para actualizaciones
+              cada hora usa <strong>Apple Calendar</strong> u <strong>Outlook</strong>, que respetan la
+              frecuencia del feed.
             </p>
           </div>
         </details>
