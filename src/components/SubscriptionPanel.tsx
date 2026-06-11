@@ -345,6 +345,15 @@ export default function SubscriptionPanel({
               </li>
             </ol>
             <p>
+              <strong>🔔 Recordatorios en Google:</strong> Google ignora las alertas incluidas en los
+              calendarios por URL. Para recibir notificaciones, en{' '}
+              <a href="https://calendar.google.com" target="_blank" rel="noreferrer">calendar.google.com</a>{' '}
+              → ⚙️ Configuración → <strong>«Mundial de Fútbol 2026»</strong> (bajo «Configuración de
+              otros calendarios») → <strong>Notificaciones de eventos</strong> → «Añadir notificación».
+              Se aplicará a todos los partidos, también en el móvil. En Apple Calendar y Outlook las
+              alertas del feed funcionan sin pasos extra.
+            </p>
+            <p>
               La primera descarga de los partidos puede tardar <strong>unos minutos</strong>. Google
               actualiza los calendarios por URL <strong>cada 8-24 horas</strong>; para actualizaciones
               cada hora usa <strong>Apple Calendar</strong> u <strong>Outlook</strong>, que respetan la
