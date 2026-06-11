@@ -331,6 +331,12 @@ body.dark-theme .gold-glow {
   padding: 0 1.5rem;
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: 0 0.75rem;
+  }
+}
+
 /* Custom range input */
 .range-slider {
   -webkit-appearance: none;
