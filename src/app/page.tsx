@@ -20,6 +20,23 @@ const GROUP_COLORS: Record<string, string> = {
   "L": "#eab308"  // Yellow
 };
 
+const TV_REGIONS = [
+  { code: 'general', name: 'General (FIFA+ / TV Local)', flagUrl: null, emoji: '🌍' },
+  { code: 'mx', name: 'México (TUDN, Azteca, ViX)', flagUrl: 'https://flagcdn.com/w40/mx.png', emoji: '🇲🇽' },
+  { code: 'ar', name: 'Argentina (TyC, Telefe, DSports)', flagUrl: 'https://flagcdn.com/w40/ar.png', emoji: '🇦🇷' },
+  { code: 'br', name: 'Brasil (TV Globo, SporTV, Globoplay)', flagUrl: 'https://flagcdn.com/w40/br.png', emoji: '🇧🇷' },
+  { code: 'co', name: 'Colombia (Caracol, RCN, DSports)', flagUrl: 'https://flagcdn.com/w40/co.png', emoji: '🇨🇴' },
+  { code: 'cl', name: 'Chile (CHV, Canal 13, DSports)', flagUrl: 'https://flagcdn.com/w40/cl.png', emoji: '🇨🇱' },
+  { code: 'pe', name: 'Perú (Latina TV, DSports)', flagUrl: 'https://flagcdn.com/w40/pe.png', emoji: '🇵🇪' },
+  { code: 'py', name: 'Paraguay (SNT, Telefuturo, Trece, DSports)', flagUrl: 'https://flagcdn.com/w40/py.png', emoji: '🇵🇾' },
+  { code: 'ec', name: 'Ecuador (Teleamazonas, ECDF, DSports)', flagUrl: 'https://flagcdn.com/w40/ec.png', emoji: '🇪🇨' },
+  { code: 'bo', name: 'Bolivia (Unitel, Red Uno, DSports)', flagUrl: 'https://flagcdn.com/w40/bo.png', emoji: '🇧🇴' },
+  { code: 'uy', name: 'Uruguay (Antel TV, DSports)', flagUrl: 'https://flagcdn.com/w40/uy.png', emoji: '🇺🇾' },
+  { code: 've', name: 'Venezuela (Televen, DSports)', flagUrl: 'https://flagcdn.com/w40/ve.png', emoji: '🇻🇪' },
+  { code: 'es', name: 'España (RTVE, Teledeporte)', flagUrl: 'https://flagcdn.com/w40/es.png', emoji: '🇪🇸' },
+  { code: 'us', name: 'EE. UU. (FOX, Telemundo, Peacock)', flagUrl: 'https://flagcdn.com/w40/us.png', emoji: '🇺🇸' }
+];
+
 interface TeamStanding {
   team: Team;
   played: number;
@@ -45,6 +62,8 @@ export default function Home() {
   const [selectedGroup, setSelectedGroup] = useState('');
   const [selectedStadium, setSelectedStadium] = useState('');
   const [selectedRegion, setSelectedRegion] = useState('general');
+  const [isTvDropdownOpen, setIsTvDropdownOpen] = useState(false);
+  const activeTvOption = TV_REGIONS.find(r => r.code === selectedRegion) || TV_REGIONS[0];
   const [alarmEnabled, setAlarmEnabled] = useState(true);
   const [alarmMinutes, setAlarmMinutes] = useState(15);
   const [scoresEnabled, setScoresEnabled] = useState(true);
@@ -92,6 +111,19 @@ export default function Home() {
       }
     }
   }, []);
+
+  // Close custom TV dropdown on click outside
+  useEffect(() => {
+    const handleOutsideClick = () => {
+      setIsTvDropdownOpen(false);
+    };
+    if (isTvDropdownOpen) {
+      window.addEventListener('click', handleOutsideClick);
+    }
+    return () => {
+      window.removeEventListener('click', handleOutsideClick);
+    };
+  }, [isTvDropdownOpen]);
 
   // Toggle Theme
   const toggleTheme = () => {
@@ -159,7 +191,8 @@ export default function Home() {
 
   // Google Calendar subscribe URL
   const getGoogleCalendarUrl = () => {
-    return `https://calendar.google.com/calendar/render?cid=${encodeURIComponent(calendarHttpUrl)}`;
+    const webcalUrl = calendarHttpUrl.replace(/^https?:\/\//i, 'webcal://');
+    return `https://calendar.google.com/calendar/render?cid=${encodeURIComponent(webcalUrl)}`;
   };
 
   // Reset all matches simulator
@@ -461,24 +494,56 @@ export default function Home() {
               </select>
             </div>
 
-            {/* TV Region Selector */}
-            <div className={styles.formGroup}>
-              <label htmlFor="tv-region">Guía de Canales de TV:</label>
-              <select 
-                id="tv-region" 
-                className={styles.select}
-                value={selectedRegion}
-                onChange={(e) => setSelectedRegion(e.target.value)}
+            {/* TV Region Selector (Custom Dropdown with images to support Windows) */}
+            <div className={styles.formGroup} style={{ position: 'relative' }}>
+              <label>Guía de Canales de TV:</label>
+              <div 
+                className={styles.customSelect} 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsTvDropdownOpen(!isTvDropdownOpen);
+                }}
               >
-                <option value="general">🌍 General (FIFA+ / TV Local)</option>
-                <option value="mx">🇲🇽 México (TUDN, Azteca, ViX)</option>
-                <option value="ar">🇦🇷 Argentina (TyC, Telefe, DSports)</option>
-                <option value="es">🇪🇸 España (RTVE, Teledeporte)</option>
-                <option value="us">🇺🇸 EE. UU. (FOX, Telemundo, Peacock)</option>
-                <option value="co">🇨🇴 Colombia (Caracol, RCN, DSports)</option>
-                <option value="cl">🇨🇱 Chile (CHV, Canal 13, DSports)</option>
-                <option value="uy">🇺🇾 Uruguay (Antel TV, DSports)</option>
-              </select>
+                <div className={styles.customSelectTrigger}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    {activeTvOption.flagUrl ? (
+                      <img 
+                        src={activeTvOption.flagUrl} 
+                        alt={activeTvOption.name} 
+                        className={styles.selectFlag} 
+                      />
+                    ) : (
+                      <span style={{ fontSize: '1.1rem', lineHeight: '1' }}>{activeTvOption.emoji}</span>
+                    )}
+                    <span>{activeTvOption.name}</span>
+                  </div>
+                  <span className={styles.arrow} style={{ transform: isTvDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block' }}>▼</span>
+                </div>
+                {isTvDropdownOpen && (
+                  <div className={styles.customSelectOptions}>
+                    {TV_REGIONS.map(regionOpt => (
+                      <div 
+                        key={regionOpt.code} 
+                        className={`${styles.customSelectOption} ${selectedRegion === regionOpt.code ? styles.customSelectOptionActive : ''}`}
+                        onClick={() => {
+                          setSelectedRegion(regionOpt.code);
+                        }}
+                      >
+                        {regionOpt.flagUrl ? (
+                          <img 
+                            src={regionOpt.flagUrl} 
+                            alt={regionOpt.name} 
+                            className={styles.selectFlag} 
+                          />
+                        ) : (
+                          <span style={{ fontSize: '1.1rem', lineHeight: '1' }}>{regionOpt.emoji}</span>
+                        )}
+                        <span>{regionOpt.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Toggle options */}
