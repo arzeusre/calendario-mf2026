@@ -29,12 +29,17 @@ function escapeText(text: string): string {
 const TV_CHANNELS: Record<string, string> = {
   "mx": "🇲🇽 México: TUDN, TV Azteca, ViX, Sky Sports",
   "ar": "🇦🇷 Argentina: TyC Sports, Telefe, TV Pública, DSports",
+  "br": "🇧🇷 Brasil: TV Globo, SporTV, Globoplay",
+  "co": "🇨🇴 Colombia: Caracol TV, RCN Televisión, DSports",
+  "cl": "🇨🇱 Chile: Chilevisión, Canal 13, DSports",
+  "pe": "🇵🇪 Perú: Latina Televisión, DSports",
+  "py": "🇵🇾 Paraguay: SNT, Telefuturo, Trece, DSports",
+  "ec": "🇪🇨 Ecuador: Teleamazonas, El Canal del Fútbol, DSports",
+  "bo": "🇧🇴 Bolivia: Unitel, Red Uno, Bolivia TV, DSports",
+  "uy": "🇺🇾 Uruguay: Antel TV, DSports, Dexary",
+  "ve": "🇻🇪 Venezuela: Televen, DSports",
   "es": "🇪🇸 España: RTVE (La 1), Teledeporte, RTVE Play",
   "us": "🇺🇸 USA: FOX Sports, Telemundo, Peacock, FuboTV",
-  "co": "🇨🇴 Colombia: Caracol TV, RCN Televisión, DSports",
-  "pe": "🇵🇪 Perú: Latina Televisión, DSports",
-  "cl": "🇨🇱 Chile: Chilevisión, Canal 13, DSports",
-  "uy": "🇺🇾 Uruguay: Antel TV, DSports, Dexary",
   "general": "📺 Transmisión: Consulta la programación de TV local o FIFA+"
 };
 
