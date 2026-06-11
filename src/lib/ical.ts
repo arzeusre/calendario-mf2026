@@ -1,4 +1,4 @@
-import { Match, Team, Stadium, TEAM_NAMES_ES, CITY_NAMES_ES, getFlagEmoji, getUtcDate, getPhaseName, translateTeamLabel, STADIUM_OFFSETS } from './utils';
+import { Match, Team, Stadium, TEAM_NAMES_ES, CITY_NAMES_ES, getFlagEmoji, getUtcDate, getPhaseName, getElapsedLabel, translateTeamLabel, STADIUM_OFFSETS } from './utils';
 
 // Format Date object to RFC 5545 iCalendar UTC string format: YYYYMMDDTHHMMSSZ
 function formatIcalDate(date: Date): string {
@@ -166,8 +166,9 @@ export function generateCalendarIcs(
     if (isFinished && includeScores) {
       summary = `✅ [FIN] ${homeFlag} ${homeName} ${match.home_score} - ${match.away_score} ${awayName} ${awayFlag}`;
     } else if (isLive && includeScores) {
-      const minutesLabel = match.time_elapsed === 'halftime' ? 'Entretiempo' : `Min ${match.time_elapsed}'`;
-      summary = `🔴 [LIV - ${minutesLabel}] ${homeFlag} ${homeName} ${match.home_score} - ${match.away_score} ${awayName} ${awayFlag}`;
+      const elapsed = getElapsedLabel(match.time_elapsed);
+      const liveLabel = elapsed ? `EN VIVO ${elapsed}` : 'EN VIVO';
+      summary = `🔴 [${liveLabel}] ${homeFlag} ${homeName} ${match.home_score} - ${match.away_score} ${awayName} ${awayFlag}`;
     } else {
       summary = `🏆 [${phaseName}] ${homeFlag} ${homeName} vs. ${awayName} ${awayFlag}`;
     }

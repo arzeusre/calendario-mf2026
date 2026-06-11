@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarClock, MapPin, Pencil, Swords } from 'lucide-react';
-import { Match, Team, TEAM_NAMES_ES, translateTeamLabel, getPhaseName } from '@/lib/utils';
+import { Match, Team, TEAM_NAMES_ES, translateTeamLabel, getPhaseName, getElapsedLabel } from '@/lib/utils';
 import { GROUP_COLORS } from '@/lib/constants';
 import styles from '@/app/page.module.css';
 
@@ -67,7 +67,8 @@ export default function MatchCard({
               <span className="badge badge-finished">Finalizado</span>
             ) : isLive ? (
               <span className="badge badge-live">
-                <span className="pulse-live-indicator" aria-hidden="true"></span> En Vivo - {match.time_elapsed === 'halftime' ? 'ET' : `${match.time_elapsed}'`}
+                <span className="pulse-live-indicator" aria-hidden="true"></span>
+                {' '}En Vivo{getElapsedLabel(match.time_elapsed) ? ` · ${getElapsedLabel(match.time_elapsed)}` : ''}
               </span>
             ) : (
               <span className="badge">Programado</span>

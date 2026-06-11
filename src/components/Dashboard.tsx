@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { CalendarSearch, ChevronDown, ChevronUp, Clock, Moon, SlidersHorizontal, Sun, Trophy } from 'lucide-react';
 import { Match, Team, Stadium, CITY_NAMES_ES, getUtcDate } from '@/lib/utils';
 import { GROUP_COLORS } from '@/lib/constants';
@@ -75,20 +75,30 @@ export default function Dashboard({ initialMatches, teams, stadiums, simulatorEn
     themeListeners.forEach(l => l());
   };
 
-  const fetchData = async (forceRefresh = false) => {
+  const fetchData = async (forceRefresh = false, silent = false) => {
     try {
-      setLoading(true);
-      setError(null);
+      if (!silent) {
+        setLoading(true);
+        setError(null);
+      }
       const res = await fetch(`/api/matches${forceRefresh ? '?refresh=true' : ''}`);
       if (!res.ok) throw new Error('Error al cargar la información del servidor');
       const data = await res.json();
       setMatches(data.matches);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      if (!silent) setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
+
+  // Live polling: silently refresh scores and statuses every 60 seconds
+  useEffect(() => {
+    const id = setInterval(() => {
+      fetchData(false, true);
+    }, 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   const handleResetMatches = async () => {
     if (!confirm('¿Estás seguro de que quieres restablecer todos los partidos al calendario inicial oficial?')) return;

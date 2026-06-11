@@ -12,7 +12,7 @@ export type { Match, Team, Stadium };
 let inMemoryMatches: Match[] | null = null;
 let lastLiveApiFetch = 0;
 let lastLiveApiAttempt = 0;
-const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+const CACHE_DURATION_MS = 60 * 1000; // 1 minute: live scores must flow
 const RETRY_AFTER_FAILURE_MS = 60 * 1000; // don't hammer a failing upstream
 
 const liveFilePath = path.join(process.cwd(), 'src', 'data', 'matches-live.json');

@@ -128,6 +128,14 @@ export function getPhaseName(match: { type: string; group: string }): string {
   return PHASE_NAMES_ES[match.type] || match.group;
 }
 
+// Human label for the in-progress clock. The live API sends "live",
+// "halftime" or the minute as a number string
+export function getElapsedLabel(timeElapsed: string): string | null {
+  if (timeElapsed === 'halftime' || timeElapsed === 'ht') return 'Descanso';
+  if (/^\d+$/.test(timeElapsed)) return `${timeElapsed}′`;
+  return null; // "live" or unknown markers: no extra detail beyond "En Vivo"
+}
+
 // Translate knockout placeholder labels ("Winner Match 74", "Runner-up Group A",
 // "3rd Group A/B/C/D/F", "Loser Match 101") to Spanish
 export function translateTeamLabel(label?: string): string {
