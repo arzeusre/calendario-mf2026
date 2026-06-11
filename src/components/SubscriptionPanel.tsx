@@ -333,8 +333,15 @@ export default function SubscriptionPanel({
                 , marca <strong>«Mundial de Fútbol 2026»</strong> y pulsa <strong>Guardar</strong>.
               </li>
               <li>
-                Abre la app de Google Calendar y desliza hacia abajo para refrescar. El calendario
-                aparecerá en el menú ☰ — márcalo como visible si no lo está.
+                En el celular, abre la app de <strong>Google Calendar</strong> y desliza hacia abajo
+                para refrescar. Luego abre el menú <strong>☰</strong>: si no ves «Mundial de Fútbol
+                2026» en la lista, toca <strong>«Ver más»</strong> bajo tu cuenta para desplegar
+                todos los calendarios, y <strong>márcalo</strong> para hacerlo visible.
+              </li>
+              <li>
+                Por último, en <strong>☰ → Ajustes → «Mundial de Fútbol 2026»</strong> (bajo tu
+                cuenta), comprueba que <strong>«Sincronización»</strong> esté activada — así los
+                partidos se mantendrán actualizados aunque cierres la app.
               </li>
             </ol>
             <p>

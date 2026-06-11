@@ -115,16 +115,49 @@
   top: 2rem;
 }
 
-/* Sticky + taller than the viewport would leave the bottom unreachable:
-   give the sidebar its own scroll on desktop */
+/* Smart scrolling on desktop: each column is its own viewport-height
+   scroll container, so the wheel moves whichever section is under the
+   pointer (native behavior) and the page only scrolls from outside them.
+   Scrollbars stay invisible until the section is hovered. */
 @media (min-width: 1025px) {
-  .sidebar {
-    max-height: calc(100vh - 3rem);
+  .sidebar,
+  .contentArea {
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
     overflow-y: auto;
     overscroll-behavior: contain;
-    scrollbar-width: thin;
-    padding-right: 4px;
+    padding-right: 6px;
     padding-bottom: 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  .sidebar:hover,
+  .contentArea:hover {
+    scrollbar-color: var(--card-border-hover) transparent;
+  }
+
+  .sidebar::-webkit-scrollbar,
+  .contentArea::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .sidebar::-webkit-scrollbar-track,
+  .contentArea::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb,
+  .contentArea::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 3px;
+  }
+
+  .sidebar:hover::-webkit-scrollbar-thumb,
+  .contentArea:hover::-webkit-scrollbar-thumb {
+    background: var(--card-border-hover);
   }
 }
 
