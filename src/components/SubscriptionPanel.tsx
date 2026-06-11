@@ -61,23 +61,23 @@ export default function SubscriptionPanel({
     };
   }, [isTvDropdownOpen]);
 
-  // Build subscription URL
-  const queryParams: string[] = [];
-  if (selectedTeam) queryParams.push(`team=${selectedTeam}`);
-  if (selectedGroup) queryParams.push(`group=${selectedGroup}`);
-  if (selectedStadium) queryParams.push(`stadium=${selectedStadium}`);
-  if (selectedRegion !== 'general') queryParams.push(`region=${selectedRegion}`);
-  if (!alarmEnabled) queryParams.push(`alarm=false`);
-  if (alarmEnabled && alarmMinutes !== 15) queryParams.push(`alarmMinutes=${alarmMinutes}`);
-  if (!scoresEnabled) queryParams.push(`scores=false`);
+  // Build the subscription URL with filters encoded in the PATH (no query
+  // string): Google and other calendar clients mangle & in subscription
+  // URLs, so /api/calendar/mundial2026_team-1_region-pe.ics is bulletproof
+  const filterParts = ['mundial2026'];
+  if (selectedTeam) filterParts.push(`team-${selectedTeam}`);
+  if (selectedGroup) filterParts.push(`group-${selectedGroup}`);
+  if (selectedStadium) filterParts.push(`stadium-${selectedStadium}`);
+  if (selectedRegion !== 'general') filterParts.push(`region-${selectedRegion}`);
+  if (!alarmEnabled) filterParts.push('alarm-off');
+  else if (alarmMinutes !== 15) filterParts.push(`alarmmin-${alarmMinutes}`);
+  if (!scoresEnabled) filterParts.push('scores-off');
 
-  const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
-  const calendarHttpUrl = `${origin}/api/calendar${queryString}`;
+  const calendarHttpUrl = `${origin}/api/calendar/${filterParts.join('_')}.ics`;
   const calendarWebcalUrl = calendarHttpUrl.replace(/^https?:\/\//i, 'webcal://');
-  // Google's "add by URL" settings page (web). The classic render?cid= link
-  // gets hijacked by the mobile app, which can't subscribe URL calendars and
-  // fails silently; this page always opens the web flow and prefills the URL
-  const googleCalendarUrl = `https://calendar.google.com/calendar/u/0/r/settings/addbyurl?cid=${encodeURIComponent(calendarHttpUrl)}`;
+  // Classic Google subscribe link; with a clean param-free URL it works
+  // reliably in the desktop/web flow
+  const googleCalendarUrl = `https://calendar.google.com/calendar/render?cid=${encodeURIComponent(calendarWebcalUrl)}`;
 
   const handleCopyUrl = async () => {
     try {
@@ -317,11 +317,13 @@ export default function SubscriptionPanel({
             </p>
             <ol>
               <li>
-                Pulsa <strong>«Añadir a Google Calendar»</strong>: se abre la página web de Google con
-                la URL ya rellenada; toca <strong>«Añadir calendario»</strong>. Comprueba arriba que
-                estás en la cuenta correcta. <em>(Si en su lugar se abre la app del teléfono pidiendo
-                elegir cuenta, cancela: esa vía de Google falla en silencio; abre el enlace en el
-                navegador.)</em>
+                <strong>Desde un ordenador</strong>, pulsa «Añadir a Google Calendar» y confirma.
+                <em> Desde el móvil no uses el diálogo de la app (Google falla en silencio):</em>{' '}
+                pulsa «Copiar URL Webcal», entra a{' '}
+                <a href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl" target="_blank" rel="noreferrer">
+                  Google Calendar → Desde una URL
+                </a>
+                , pega la dirección y toca <strong>«Agregar calendario»</strong>.
               </li>
               <li>
                 Activa la sincronización al móvil: entra a{' '}
