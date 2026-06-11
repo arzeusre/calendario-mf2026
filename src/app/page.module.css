@@ -115,6 +115,19 @@
   top: 2rem;
 }
 
+/* Sticky + taller than the viewport would leave the bottom unreachable:
+   give the sidebar its own scroll on desktop */
+@media (min-width: 1025px) {
+  .sidebar {
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    padding-right: 4px;
+    padding-bottom: 0.5rem;
+  }
+}
+
 @media (max-width: 1024px) {
   .sidebar {
     position: static;
@@ -384,6 +397,15 @@
 
 .helpContent strong {
   color: var(--text-main);
+}
+
+.helpContent a {
+  color: var(--wc-blue);
+  text-decoration: underline;
+}
+
+:global(.dark-theme) .helpContent a {
+  color: #60a5fa;
 }
 
 .contentArea {

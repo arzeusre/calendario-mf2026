@@ -309,20 +309,23 @@ export default function SubscriptionPanel({
           </summary>
           <div className={styles.helpContent}>
             <p>
-              <strong>Google Calendar</strong> añade los calendarios por URL solo en su versión web,
-              y <strong>no los sincroniza al móvil automáticamente</strong>. Tras añadirlo desde un
-              ordenador, actívalo en tu teléfono:
+              Al pulsar «Añadir a Google Calendar», Google lo agrega a tu cuenta pero lo deja
+              <strong> oculto y sin sincronizar</strong> en el móvil — aunque diga «agregado
+              correctamente», no lo verás hasta activarlo:
             </p>
             <ol>
-              <li>Abre la app de <strong>Google Calendar</strong> en el móvil.</li>
+              <li>Abre la app de <strong>Google Calendar</strong>.</li>
               <li>Menú ☰ → <strong>Ajustes</strong>.</li>
-              <li>Toca <strong>«Mundial de Fútbol 2026»</strong> (bajo tu cuenta).</li>
+              <li>Bajo tu cuenta de Google, toca <strong>«Mundial de Fútbol 2026»</strong> (si no
+                aparece, toca <strong>Mostrar más</strong>).</li>
               <li>Activa <strong>Sincronización</strong>.</li>
+              <li>Vuelve al calendario: marca también el calendario como visible en el menú ☰.</li>
             </ol>
             <p>
-              El botón «Añadir a Google Calendar» desde el móvil abre la versión web de Google
-              (limitación de Google, la app no admite suscripciones por URL). Hazlo una vez y
-              luego activa la sincronización como arriba.
+              La primera vez, Google puede tardar <strong>unos minutos</strong> en descargar los
+              partidos. Puedes comprobar que está añadido entrando a{' '}
+              <a href="https://calendar.google.com" target="_blank" rel="noreferrer">calendar.google.com</a>{' '}
+              → «Otros calendarios».
             </p>
             <p>
               Google actualiza los calendarios por URL <strong>cada 8-24 horas</strong>. Para
