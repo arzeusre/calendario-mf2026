@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Local verification artifacts (screenshots + capture scripts)
+    "verification-screenshots/**",
   ]),
 ]);
 

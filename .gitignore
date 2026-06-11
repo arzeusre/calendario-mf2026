@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local simulator state (dev only)
+src/data/matches-live.json
+
+# verification artifacts
+/verification-screenshots/
