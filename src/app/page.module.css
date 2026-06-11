@@ -159,14 +159,6 @@
   .contentArea:hover::-webkit-scrollbar-thumb {
     background: var(--card-border-hover);
   }
-
-  /* Keep the filter tabs pinned while the fixture scrolls beneath */
-  .tabs {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: var(--background);
-  }
 }
 
 @media (max-width: 1024px) {
@@ -519,6 +511,19 @@
   background: var(--tab-active-bg);
   color: var(--tab-active-text);
   box-shadow: var(--shadow-card);
+}
+
+/* Pinned tab strip (desktop smart scrolling). Placed AFTER the base .tabs
+   rule so the solid background wins the cascade — the translucent default
+   let the fixture show through while scrolling underneath */
+@media (min-width: 1025px) {
+  .tabs {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--background);
+    box-shadow: 0 6px 10px -8px rgba(15, 23, 42, 0.25);
+  }
 }
 
 .filterHeader {
