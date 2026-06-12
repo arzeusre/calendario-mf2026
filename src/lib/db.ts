@@ -4,6 +4,7 @@ import teamsData from '../data/teams.json';
 import stadiumsData from '../data/stadiums.json';
 import matchesData from '../data/matches.json';
 import { Match, Team, Stadium } from './utils';
+import { fetchFootballDataOverlay } from './footballData';
 
 // Re-export type definitions for server usage
 export type { Match, Team, Stadium };
@@ -81,14 +82,24 @@ export async function getStadiums(): Promise<Stadium[]> {
 export async function getMatches(forceRefresh = false): Promise<Match[]> {
   const cacheExpired = Date.now() - lastLiveApiFetch >= CACHE_DURATION_MS;
   if (!inMemoryMatches || forceRefresh || cacheExpired) {
+    let base = inMemoryMatches;
     const liveMatches = await fetchMatchesFromLiveApi();
-    if (liveMatches) {
-      inMemoryMatches = liveMatches;
-    } else if (!inMemoryMatches) {
+    if (liveMatches) base = liveMatches;
+    if (!base) {
       // Keep existing in-memory data (incl. simulations) when the live API
       // is unavailable; only fall back to disk on a cold start
-      inMemoryMatches = loadMatchesFromDisk();
+      base = loadMatchesFromDisk();
     }
+
+    // Preferred provider: football-data.org overlay (fresher scores and
+    // real match minute) when FOOTBALL_DATA_TOKEN is configured
+    const overlaid = await fetchFootballDataOverlay(base, teamsData as Team[]);
+    if (overlaid) {
+      base = overlaid;
+      lastLiveApiFetch = Date.now();
+    }
+
+    inMemoryMatches = base;
   }
   return inMemoryMatches;
 }

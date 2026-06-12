@@ -136,7 +136,7 @@ export default function MatchCard({
           </div>
 
           <div className={styles.scoreContainer}>
-            {isLive || isFinished ? (
+            {isLive || isFinished || estimatedLive ? (
               <div className={styles.score}>
                 <span>{match.home_score}</span>
                 <span>-</span>

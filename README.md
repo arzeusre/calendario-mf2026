@@ -53,6 +53,7 @@ La ruta de API `/api/calendar` (en `src/app/api/calendar/route.ts`) genera diná
 
 | Variable | Descripción |
 | :--- | :--- |
+| `FOOTBALL_DATA_TOKEN` | Token gratuito de [football-data.org](https://www.football-data.org/client/register). Si se define, los marcadores, estados y minuto de juego se obtienen de esa API (actualización ~1 min); sin él se usa el proveedor de respaldo (worldcup26.ir). |
 | `NEXT_PUBLIC_ENABLE_SIMULATOR` | `true` para mostrar el panel de simulación y habilitar la escritura en `/api/matches` en producción. Por defecto el simulador solo está disponible en desarrollo. |
 | `ADMIN_TOKEN` | Si se define, permite `POST`/`DELETE` en `/api/matches` enviando el header `x-admin-token` con ese valor. |
 
