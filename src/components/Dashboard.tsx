@@ -15,6 +15,7 @@ interface DashboardProps {
   initialMatches: Match[];
   teams: Team[];
   stadiums: Stadium[];
+  initialTimeZone: string; // IP-derived zone used for the server render
   simulatorEnabled: boolean;
 }
 
@@ -35,7 +36,6 @@ const GROUP_LETTERS = Array.from({ length: 12 }, (_, i) => String.fromCharCode(6
 // is deterministic and the client value kicks in right after hydration
 const emptySubscribe = () => () => {};
 const getClientTimeZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
-const getServerTimeZone = () => 'UTC';
 
 // Theme lives on <html> (set pre-paint by the layout script); toggling
 // notifies subscribers so React re-reads the class
@@ -74,7 +74,7 @@ const subscribeNow = (listener: () => void) => {
 const getNowSnapshot = () => nowSnapshot;
 const getServerNow = () => 0;
 
-export default function Dashboard({ initialMatches, teams, stadiums, simulatorEnabled }: DashboardProps) {
+export default function Dashboard({ initialMatches, teams, stadiums, initialTimeZone, simulatorEnabled }: DashboardProps) {
   const [matches, setMatches] = useState<Match[]>(initialMatches);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -91,8 +91,9 @@ export default function Dashboard({ initialMatches, teams, stadiums, simulatorEn
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
   const [selectedGroupModal, setSelectedGroupModal] = useState<string | null>(null);
 
-  // UTC during SSR/hydration; the user's zone right after hydration
-  const timeZone = useSyncExternalStore(emptySubscribe, getClientTimeZone, getServerTimeZone);
+  // Server render uses the IP-derived zone (instant local times); the
+  // browser's own zone takes over right after hydration if it differs
+  const timeZone = useSyncExternalStore(emptySubscribe, getClientTimeZone, () => initialTimeZone);
 
   // Ticks every 10 s; 0 during SSR/hydration
   const now = useSyncExternalStore(subscribeNow, getNowSnapshot, getServerNow);
