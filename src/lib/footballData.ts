@@ -13,6 +13,25 @@ const KICKOFF_TOLERANCE_MS = 30 * 60 * 1000;
 const MIN_ATTEMPT_INTERVAL_MS = 30 * 1000;
 let lastAttempt = 0;
 
+// Diagnostics surfaced via /api/matches so provider health is visible
+// without access to server logs
+export interface ProviderStatus {
+  tokenConfigured: boolean;
+  lastResult: 'never' | 'ok' | 'http-error' | 'fetch-failed' | 'bad-shape' | 'throttled';
+  httpStatus?: number;
+  applied?: number;
+  at?: string;
+}
+
+let providerStatus: ProviderStatus = {
+  tokenConfigured: false,
+  lastResult: 'never'
+};
+
+export function getProviderStatus(): ProviderStatus {
+  return providerStatus;
+}
+
 interface FdTeam {
   id?: number;
   name?: string | null;
@@ -93,9 +112,12 @@ function mapStatus(fd: FdMatch): { time_elapsed: string; finished: string } | nu
 
 export async function fetchFootballDataOverlay(baseMatches: Match[], teams: Team[]): Promise<Match[] | null> {
   const token = process.env.FOOTBALL_DATA_TOKEN;
+  providerStatus = { ...providerStatus, tokenConfigured: Boolean(token) };
   if (!token) return null;
   const nowMs = Date.now();
-  if (nowMs - lastAttempt < MIN_ATTEMPT_INTERVAL_MS) return null;
+  if (nowMs - lastAttempt < MIN_ATTEMPT_INTERVAL_MS) {
+    return null; // keep last providerStatus untouched
+  }
   lastAttempt = nowMs;
 
   let fdMatches: FdMatch[];
@@ -106,13 +128,18 @@ export async function fetchFootballDataOverlay(baseMatches: Match[], teams: Team
     });
     if (!res.ok) {
       console.warn(`football-data.org responded ${res.status}; keeping base data`);
+      providerStatus = { tokenConfigured: true, lastResult: 'http-error', httpStatus: res.status, at: new Date().toISOString() };
       return null;
     }
     const data = await res.json();
-    if (!Array.isArray(data?.matches)) return null;
+    if (!Array.isArray(data?.matches)) {
+      providerStatus = { tokenConfigured: true, lastResult: 'bad-shape', at: new Date().toISOString() };
+      return null;
+    }
     fdMatches = data.matches as FdMatch[];
   } catch (error) {
     console.warn('football-data.org fetch failed:', error);
+    providerStatus = { tokenConfigured: true, lastResult: 'fetch-failed', at: new Date().toISOString() };
     return null;
   }
 
@@ -173,5 +200,6 @@ export async function fetchFootballDataOverlay(baseMatches: Match[], teams: Team
   }
 
   console.log(`football-data.org overlay applied to ${applied} matches`);
+  providerStatus = { tokenConfigured: true, lastResult: 'ok', applied, at: new Date().toISOString() };
   return merged;
 }

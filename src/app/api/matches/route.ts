@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getMatches, getTeams, getStadiums, updateMatch, resetMatches } from '@/lib/db';
+import { getProviderStatus } from '@/lib/footballData';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +27,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       matches,
       teams,
-      stadiums
+      stadiums,
+      provider: getProviderStatus()
     });
   } catch (error) {
     console.error('Error fetching matches data:', error);

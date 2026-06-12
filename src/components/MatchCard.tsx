@@ -35,6 +35,9 @@ export default function MatchCard({
   const apiLagging = !isLive && !isFinished && minsSinceKickoff !== null && minsSinceKickoff >= 0 && minsSinceKickoff < 150;
   const aboutToStart = apiLagging && minsSinceKickoff < 3;
   const estimatedLive = apiLagging && minsSinceKickoff >= 3;
+  // The reverse lag: the source forgot to close the match (stuck "live"
+  // hours after kickoff) — stop claiming it's in progress
+  const staleLive = isLive && minsSinceKickoff !== null && minsSinceKickoff > 160;
   const liveDetail = isLive
     ? getLiveMinuteEstimate(match.time_elapsed, kickoffMs, now)
     : estimatedLive
@@ -82,6 +85,10 @@ export default function MatchCard({
           <div>
             {isFinished ? (
               <span className="badge badge-finished">Finalizado</span>
+            ) : staleLive ? (
+              <span className="badge badge-finished" title="La fuente de datos aún no confirma el cierre del partido">
+                Final (por confirmar)
+              </span>
             ) : isLive ? (
               <span className="badge badge-live">
                 <span className="pulse-live-indicator" aria-hidden="true"></span>
