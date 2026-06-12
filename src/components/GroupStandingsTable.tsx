@@ -39,18 +39,20 @@ export default function GroupStandingsTable({ group, teams, matches, onSelectTea
                 key={std.team.id}
                 className={idx < 2 ? styles.rowQualifies : idx === 2 ? styles.rowThird : undefined}
               >
-                <td className={styles.tableTeamCell}>
-                  <span style={{ width: '15px', color: 'var(--text-muted)', fontSize: '0.75rem' }}>{idx + 1}</span>
-                  <img src={std.team.flag} alt="" className={styles.flag} style={{ width: '22px', height: '15px' }} loading="lazy" />
-                  <button
-                    type="button"
-                    className={styles.teamNameLink}
-                    style={{ background: 'none', border: 'none', font: 'inherit', fontWeight: 600, color: 'inherit', padding: 0, textAlign: 'left' }}
-                    onClick={() => onSelectTeam(std.team.id)}
-                    title={`Ver partidos de ${TEAM_NAMES_ES[std.team.name_en] || std.team.name_en}`}
-                  >
-                    {TEAM_NAMES_ES[std.team.name_en] || std.team.name_en}
-                  </button>
+                <td className={styles.tableTeamTd}>
+                  <div className={styles.tableTeamCell}>
+                    <span style={{ width: '15px', flexShrink: 0, color: 'var(--text-muted)', fontSize: '0.75rem' }}>{idx + 1}</span>
+                    <img src={std.team.flag} alt="" className={styles.flag} style={{ width: '22px', height: '15px', flexShrink: 0 }} loading="lazy" />
+                    <button
+                      type="button"
+                      className={styles.teamNameLink}
+                      style={{ background: 'none', border: 'none', font: 'inherit', fontWeight: 600, color: 'inherit', padding: 0, textAlign: 'left' }}
+                      onClick={() => onSelectTeam(std.team.id)}
+                      title={`Ver partidos de ${TEAM_NAMES_ES[std.team.name_en] || std.team.name_en}`}
+                    >
+                      {TEAM_NAMES_ES[std.team.name_en] || std.team.name_en}
+                    </button>
+                  </div>
                 </td>
                 <td className={styles.tableTextCenter}>{std.played}</td>
                 <td className={styles.tableTextCenter}>{std.won}</td>

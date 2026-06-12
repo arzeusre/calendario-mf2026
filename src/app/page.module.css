@@ -660,8 +660,8 @@
   align-items: center;
   justify-content: center;
   gap: 1.5rem;
-  padding: 0.5rem 0;
-  transition: flex-direction 0.25s;
+  /* Breathing room between the scoreboard and the header/footer rows */
+  padding: 1.35rem 0;
 }
 
 .team {
@@ -782,43 +782,47 @@
   opacity: 1;
 }
 
-/* Mobile responsive match teams stacked view */
+/* Mobile scoreboard: home on the left, away on the right, flag above
+   the name and the score in the middle (classic broadcast layout) */
 @media (max-width: 480px) {
   .matchTeams {
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 0.25rem 0;
-  }
-  
-  .team {
-    justify-content: center;
-    text-align: center;
     flex-direction: row;
-    width: 100%;
+    align-items: flex-start;
     gap: 0.5rem;
-  }
-  
-  .homeTeam, .awayTeam {
-    justify-content: center !important;
+    padding: 0.85rem 0;
   }
 
-  /* In the stacked mobile layout names sit next to the flag; wrapped
-     lines read better left-aligned than centered */
-  .teamNameHome, .teamNameAway {
-    text-align: left;
+  .team {
+    flex: 1;
+    width: auto;
+    align-items: center;
+    gap: 0.45rem;
   }
-  
+
+  .homeTeam, .awayTeam {
+    justify-content: flex-start !important;
+  }
+
   .homeTeam {
-    flex-direction: row-reverse; /* Flag on right for home team */
+    flex-direction: column-reverse; /* DOM is name+flag: reversed = flag on top */
   }
 
   .awayTeam {
-    flex-direction: row; /* Flag on left for away team */
+    flex-direction: column; /* DOM is flag+name: flag already on top */
   }
-  
+
+  .teamNameHome, .teamNameAway {
+    text-align: center;
+  }
+
+  .matchTeams .flag {
+    width: 44px;
+    height: 30px;
+  }
+
   .scoreContainer {
-    min-width: auto;
-    margin: 0.25rem 0;
+    min-width: 70px;
+    margin-top: 0.65rem;
   }
 
   .statsGrid {
@@ -932,6 +936,15 @@
 
 .groupTable th, .groupTable td {
   padding: 0.5rem 0.35rem;
+  /* Numeric columns keep their width; only the team name is allowed to wrap */
+  white-space: nowrap;
+}
+
+/* The team column absorbs all remaining width so long names wrap inside
+   it without shifting the numeric columns of that row */
+.tableTeamTd {
+  width: 100%;
+  white-space: normal;
 }
 
 .groupTable th {
@@ -951,11 +964,14 @@
   border-bottom: none;
 }
 
+/* Flex lives on an inner div: display:flex directly on a <td> breaks
+   table-cell layout and misaligned rows with long names */
 .tableTeamCell {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-weight: 600;
+  min-width: 130px;
 }
 
 .tableTextRight {

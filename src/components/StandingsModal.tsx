@@ -2,7 +2,7 @@
 
 import { BarChart3 } from 'lucide-react';
 import { Match, Team } from '@/lib/utils';
-import { GROUP_COLORS } from '@/lib/constants';
+import { GROUP_COLORS, GROUP_TEXT_COLORS } from '@/lib/constants';
 import Modal from './Modal';
 import GroupStandingsTable from './GroupStandingsTable';
 import styles from '@/app/page.module.css';
@@ -25,7 +25,8 @@ export default function StandingsModal({ group, teams, matches, onClose, onSelec
       <div className={styles.simulatorHeader}>
         <h3 id="standings-title" className={styles.simulatorTitle}>
           <BarChart3 size={20} aria-hidden="true" style={{ verticalAlign: 'text-bottom', marginRight: '0.4rem' }} />
-          Tabla de Posiciones - Grupo {group}
+          Tabla de Posiciones -{' '}
+          <span style={{ color: GROUP_TEXT_COLORS[group] || 'inherit' }}>Grupo {group}</span>
         </h3>
         <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
           Fase de Grupos (Calculado en tiempo real)

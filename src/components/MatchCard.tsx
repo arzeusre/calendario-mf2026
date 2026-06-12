@@ -28,10 +28,18 @@ export default function MatchCard({
   // Countdown / kickoff-pending states (only after hydration, when now > 0)
   const kickoffMs = getUtcDate(match.local_date, match.stadium_id).getTime();
   const minsToKickoff = now > 0 ? Math.ceil((kickoffMs - now) / 60000) : null;
+  const minsSinceKickoff = now > 0 ? Math.floor((now - kickoffMs) / 60000) : null;
   const startsSoon = !isLive && !isFinished && minsToKickoff !== null && minsToKickoff >= 1 && minsToKickoff <= 60;
-  // Kickoff time passed but the data source hasn't flipped to live yet
-  const aboutToStart = !isLive && !isFinished && minsToKickoff !== null && minsToKickoff < 1 && (now - kickoffMs) < 3 * 60 * 60 * 1000;
-  const liveDetail = isLive ? getLiveMinuteEstimate(match.time_elapsed, kickoffMs, now) : null;
+  // Kickoff time passed but the data source hasn't flipped to live yet:
+  // brief "Por comenzar", then clock-estimated "En Juego" until it catches up
+  const apiLagging = !isLive && !isFinished && minsSinceKickoff !== null && minsSinceKickoff >= 0 && minsSinceKickoff < 150;
+  const aboutToStart = apiLagging && minsSinceKickoff < 3;
+  const estimatedLive = apiLagging && minsSinceKickoff >= 3;
+  const liveDetail = isLive
+    ? getLiveMinuteEstimate(match.time_elapsed, kickoffMs, now)
+    : estimatedLive
+      ? getLiveMinuteEstimate('live', kickoffMs, now)
+      : null;
 
   const homeLabelName = homeTeam && match.home_team_id !== '0'
     ? (TEAM_NAMES_ES[homeTeam.name_en] || homeTeam.name_en)
@@ -78,6 +86,11 @@ export default function MatchCard({
               <span className="badge badge-live">
                 <span className="pulse-live-indicator" aria-hidden="true"></span>
                 {' '}En Vivo{liveDetail ? ` · ${liveDetail}` : ''}
+              </span>
+            ) : estimatedLive ? (
+              <span className="badge badge-live" title="Minuto estimado; la fuente de datos aún no confirma el inicio">
+                <span className="pulse-live-indicator" aria-hidden="true"></span>
+                {' '}En Juego{liveDetail ? ` · ${liveDetail}` : ''}
               </span>
             ) : startsSoon ? (
               <span className="badge badge-soon">

@@ -14,6 +14,23 @@ export const GROUP_COLORS: Record<string, string> = {
   "L": "#eab308"  // Yellow
 };
 
+// Darker text shades per group (AA contrast on light backgrounds),
+// matching the .group-badge-X classes in globals.css
+export const GROUP_TEXT_COLORS: Record<string, string> = {
+  "A": "#b91c1c",
+  "B": "#1d4ed8",
+  "C": "#047857",
+  "D": "#92400e",
+  "E": "#6d28d9",
+  "F": "#be185d",
+  "G": "#155e75",
+  "H": "#0f766e",
+  "I": "#4338ca",
+  "J": "#7e22ce",
+  "K": "#a21caf",
+  "L": "#854d0e"
+};
+
 export interface TvRegion {
   code: string;
   name: string;
