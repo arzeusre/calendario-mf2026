@@ -78,6 +78,9 @@ export default function SubscriptionPanel({
   // Classic Google subscribe link; with a clean param-free URL it works
   // reliably in the desktop/web flow
   const googleCalendarUrl = `https://calendar.google.com/calendar/render?cid=${encodeURIComponent(calendarWebcalUrl)}`;
+  // Outlook deep link: its "subscribe from web" form only accepts https://
+  // URLs (webcal:// fails with "could not import"), so prefill it properly
+  const outlookUrl = `https://outlook.live.com/calendar/0/addfromweb?url=${encodeURIComponent(calendarHttpUrl)}&name=${encodeURIComponent('Mundial de Fútbol 2026')}`;
 
   const handleCopyUrl = async () => {
     try {
@@ -295,6 +298,16 @@ export default function SubscriptionPanel({
           </a>
 
           <a
+            href={outlookUrl}
+            target="_blank"
+            rel="noreferrer"
+            className={`${styles.btn} ${styles.btnOutline}`}
+            style={{ textAlign: 'center' }}
+          >
+            <CalendarPlus size={16} aria-hidden="true" /> Añadir a Outlook
+          </a>
+
+          <a
             href={calendarHttpUrl}
             download="mundial2026.ics"
             className={`${styles.btn} ${styles.btnOutline}`}
@@ -354,6 +367,12 @@ export default function SubscriptionPanel({
                 funcionan sin pasos extra.)</em>
               </li>
             </ol>
+            <p>
+              <strong>Outlook:</strong> usa el botón «Añadir a Outlook». Si prefieres pegar la URL a
+              mano en «Suscribirse desde la web», cambia <strong>webcal://</strong> por{' '}
+              <strong>https://</strong> — Outlook solo acepta direcciones https y muestra «No se pudo
+              importar» con webcal.
+            </p>
             <p>
               La primera descarga de los partidos puede tardar <strong>unos minutos</strong>. Google
               actualiza los calendarios por URL <strong>cada 8-24 horas</strong>; para actualizaciones

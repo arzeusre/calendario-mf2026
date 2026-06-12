@@ -1,7 +1,7 @@
 "use client";
 
-import { CalendarClock, MapPin, Pencil, Swords } from 'lucide-react';
-import { Match, Team, TEAM_NAMES_ES, translateTeamLabel, getPhaseName, getElapsedLabel } from '@/lib/utils';
+import { CalendarClock, MapPin, Pencil, Swords, Timer } from 'lucide-react';
+import { Match, Team, TEAM_NAMES_ES, translateTeamLabel, getPhaseName, getLiveMinuteEstimate, getUtcDate } from '@/lib/utils';
 import { GROUP_COLORS } from '@/lib/constants';
 import styles from '@/app/page.module.css';
 
@@ -11,6 +11,7 @@ interface MatchCardProps {
   awayTeam?: Team;
   stadiumText: string;
   timeText: string;
+  now: number; // shared wall clock (0 during SSR)
   simulatorEnabled: boolean;
   onSelectTeam: (teamId: string) => void;
   onShowGroup: (group: string) => void;
@@ -18,11 +19,19 @@ interface MatchCardProps {
 }
 
 export default function MatchCard({
-  match, homeTeam, awayTeam, stadiumText, timeText,
+  match, homeTeam, awayTeam, stadiumText, timeText, now,
   simulatorEnabled, onSelectTeam, onShowGroup, onSimulate
 }: MatchCardProps) {
   const isFinished = match.finished === 'TRUE';
   const isLive = match.time_elapsed !== 'notstarted' && !isFinished;
+
+  // Countdown / kickoff-pending states (only after hydration, when now > 0)
+  const kickoffMs = getUtcDate(match.local_date, match.stadium_id).getTime();
+  const minsToKickoff = now > 0 ? Math.ceil((kickoffMs - now) / 60000) : null;
+  const startsSoon = !isLive && !isFinished && minsToKickoff !== null && minsToKickoff >= 1 && minsToKickoff <= 60;
+  // Kickoff time passed but the data source hasn't flipped to live yet
+  const aboutToStart = !isLive && !isFinished && minsToKickoff !== null && minsToKickoff < 1 && (now - kickoffMs) < 3 * 60 * 60 * 1000;
+  const liveDetail = isLive ? getLiveMinuteEstimate(match.time_elapsed, kickoffMs, now) : null;
 
   const homeLabelName = homeTeam && match.home_team_id !== '0'
     ? (TEAM_NAMES_ES[homeTeam.name_en] || homeTeam.name_en)
@@ -68,7 +77,15 @@ export default function MatchCard({
             ) : isLive ? (
               <span className="badge badge-live">
                 <span className="pulse-live-indicator" aria-hidden="true"></span>
-                {' '}En Vivo{getElapsedLabel(match.time_elapsed) ? ` · ${getElapsedLabel(match.time_elapsed)}` : ''}
+                {' '}En Vivo{liveDetail ? ` · ${liveDetail}` : ''}
+              </span>
+            ) : startsSoon ? (
+              <span className="badge badge-soon">
+                <Timer size={11} aria-hidden="true" /> Empieza en {minsToKickoff} min
+              </span>
+            ) : aboutToStart ? (
+              <span className="badge badge-soon">
+                <span className="pulse-live-indicator" aria-hidden="true"></span> Por comenzar
               </span>
             ) : (
               <span className="badge">Programado</span>

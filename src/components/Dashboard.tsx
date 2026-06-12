@@ -49,6 +49,31 @@ const subscribeTheme = (listener: () => void) => {
 const getClientIsLight = () => !document.documentElement.classList.contains('dark-theme');
 const getServerIsLight = () => true;
 
+// Shared 10-second wall clock for countdowns and live-minute estimates.
+// Snapshot only changes when the timer fires, so renders stay consistent;
+// the server snapshot (0) keeps hydration deterministic.
+let nowListeners: Array<() => void> = [];
+let nowTimer: ReturnType<typeof setInterval> | null = null;
+let nowSnapshot = typeof window !== 'undefined' ? Date.now() : 0;
+const subscribeNow = (listener: () => void) => {
+  nowListeners.push(listener);
+  if (!nowTimer) {
+    nowTimer = setInterval(() => {
+      nowSnapshot = Date.now();
+      nowListeners.forEach(l => l());
+    }, 10_000);
+  }
+  return () => {
+    nowListeners = nowListeners.filter(l => l !== listener);
+    if (nowListeners.length === 0 && nowTimer) {
+      clearInterval(nowTimer);
+      nowTimer = null;
+    }
+  };
+};
+const getNowSnapshot = () => nowSnapshot;
+const getServerNow = () => 0;
+
 export default function Dashboard({ initialMatches, teams, stadiums, simulatorEnabled }: DashboardProps) {
   const [matches, setMatches] = useState<Match[]>(initialMatches);
   const [loading, setLoading] = useState(false);
@@ -68,6 +93,9 @@ export default function Dashboard({ initialMatches, teams, stadiums, simulatorEn
 
   // UTC during SSR/hydration; the user's zone right after hydration
   const timeZone = useSyncExternalStore(emptySubscribe, getClientTimeZone, getServerTimeZone);
+
+  // Ticks every 10 s; 0 during SSR/hydration
+  const now = useSyncExternalStore(subscribeNow, getNowSnapshot, getServerNow);
 
   const toggleTheme = () => {
     const nowDark = document.documentElement.classList.toggle('dark-theme');
@@ -92,13 +120,14 @@ export default function Dashboard({ initialMatches, teams, stadiums, simulatorEn
     }
   };
 
-  // Live polling: silently refresh scores and statuses every 60 seconds
+  // Live polling: silent refresh, faster while a match is in progress
+  const hasLiveMatch = matches.some(m => m.time_elapsed !== 'notstarted' && m.finished !== 'TRUE');
   useEffect(() => {
     const id = setInterval(() => {
       fetchData(false, true);
-    }, 60_000);
+    }, hasLiveMatch ? 30_000 : 60_000);
     return () => clearInterval(id);
-  }, []);
+  }, [hasLiveMatch]);
 
   const handleResetMatches = async () => {
     if (!confirm('¿Estás seguro de que quieres restablecer todos los partidos al calendario inicial oficial?')) return;
@@ -166,9 +195,9 @@ export default function Dashboard({ initialMatches, teams, stadiums, simulatorEn
     timeZone, hour: '2-digit', minute: '2-digit', hour12: false
   }), [timeZone]);
 
-  const now = new Date();
-  const todayKey = dayKeyFmt.format(now);
-  const tomorrowKey = dayKeyFmt.format(new Date(now.getTime() + 24 * 60 * 60 * 1000));
+  const currentDate = now > 0 ? new Date(now) : new Date();
+  const todayKey = dayKeyFmt.format(currentDate);
+  const tomorrowKey = dayKeyFmt.format(new Date(currentDate.getTime() + 24 * 60 * 60 * 1000));
 
   const matchDays = useMemo(() => {
     const sorted = [...filteredMatches].sort((a, b) => {
@@ -409,6 +438,7 @@ export default function Dashboard({ initialMatches, teams, stadiums, simulatorEn
                           awayTeam={teamMap.get(match.away_team_id)}
                           stadiumText={getStadiumDetailsText(match.stadium_id)}
                           timeText={timeFmt.format(getUtcDate(match.local_date, match.stadium_id))}
+                          now={now}
                           simulatorEnabled={simulatorEnabled}
                           onSelectTeam={handleSelectTeam}
                           onShowGroup={setSelectedGroupModal}

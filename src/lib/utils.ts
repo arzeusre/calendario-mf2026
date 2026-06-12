@@ -132,8 +132,25 @@ export function getPhaseName(match: { type: string; group: string }): string {
 // "halftime" or the minute as a number string
 export function getElapsedLabel(timeElapsed: string): string | null {
   if (timeElapsed === 'halftime' || timeElapsed === 'ht') return 'Descanso';
+  if (timeElapsed === 'extratime' || timeElapsed === 'et' || timeElapsed === 'overtime') return 'Tiempo Extra';
+  if (timeElapsed.startsWith('pen')) return 'Penales';
   if (/^\d+$/.test(timeElapsed)) return `${timeElapsed}′`;
   return null; // "live" or unknown markers: no extra detail beyond "En Vivo"
+}
+
+// Match minute for the live badge. Prefers what the API reports; when it
+// only says "live", estimates from wall-clock time since kickoff
+// (subtracting the ~17 min halftime break after minute 45)
+export function getLiveMinuteEstimate(timeElapsed: string, kickoffMs: number, nowMs: number): string | null {
+  const reported = getElapsedLabel(timeElapsed);
+  if (reported) return reported;
+  if (nowMs <= 0 || kickoffMs <= 0) return null;
+  const mins = Math.floor((nowMs - kickoffMs) / 60000);
+  if (mins < 1) return '1′';
+  if (mins <= 45) return `≈${mins}′`;
+  if (mins <= 62) return '45+′ · Descanso';
+  if (mins <= 112) return `≈${Math.min(90, mins - 17)}′`;
+  return '90+′';
 }
 
 // Translate knockout placeholder labels ("Winner Match 74", "Runner-up Group A",
