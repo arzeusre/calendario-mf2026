@@ -18,6 +18,12 @@ const RETRY_AFTER_FAILURE_MS = 60 * 1000; // don't hammer a failing upstream
 
 const liveFilePath = path.join(process.cwd(), 'src', 'data', 'matches-live.json');
 
+// Real kickoff timestamps, captured server-side when a match first flips
+// notstarted→live. Served to every client so the live minute is accurate
+// even for visitors who open the page mid-match. Resets on a cold start
+// (then clients fall back to the scheduled-kickoff estimate).
+const kickoffByMatchId: Record<string, number> = {};
+
 // Load matches from disk (live file if exists, else default matches.json)
 function loadMatchesFromDisk(): Match[] {
   try {
@@ -82,6 +88,11 @@ export async function getStadiums(): Promise<Stadium[]> {
 export async function getMatches(forceRefresh = false): Promise<Match[]> {
   const cacheExpired = Date.now() - lastLiveApiFetch >= CACHE_DURATION_MS;
   if (!inMemoryMatches || forceRefresh || cacheExpired) {
+    // Snapshot of previous statuses, to detect notstarted→live transitions
+    const prevStatus = inMemoryMatches
+      ? new Map(inMemoryMatches.map(m => [m.id, m.time_elapsed]))
+      : null;
+
     let base = inMemoryMatches;
     const liveMatches = await fetchMatchesFromLiveApi();
     if (liveMatches) base = liveMatches;
@@ -97,6 +108,21 @@ export async function getMatches(forceRefresh = false): Promise<Match[]> {
     if (overlaid) {
       base = overlaid;
       lastLiveApiFetch = Date.now();
+    }
+
+    // Record the real kickoff the first time a match goes live, then stamp
+    // every match that has one so the client clock counts from actual start
+    if (prevStatus) {
+      for (const m of base) {
+        const wasNotStarted = prevStatus.get(m.id) === 'notstarted';
+        const isLiveNow = m.time_elapsed !== 'notstarted' && m.finished !== 'TRUE';
+        if (wasNotStarted && isLiveNow && kickoffByMatchId[m.id] == null) {
+          kickoffByMatchId[m.id] = Date.now();
+        }
+      }
+    }
+    for (const m of base) {
+      if (kickoffByMatchId[m.id] != null) m.live_since = kickoffByMatchId[m.id];
     }
 
     inMemoryMatches = base;

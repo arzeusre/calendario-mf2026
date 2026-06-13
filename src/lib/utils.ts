@@ -38,6 +38,7 @@ export interface Match {
   type: string; // "group", "r16", "qf", "sf", "third", "final"
   home_team_label?: string; // e.g. "Winner Match 81"
   away_team_label?: string; // e.g. "Winner Match 82"
+  live_since?: number; // epoch ms when the match was first observed live (real kickoff)
 }
 
 // Spanish translation dictionary for teams

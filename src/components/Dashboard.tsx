@@ -495,7 +495,7 @@ export default function Dashboard({ initialMatches, teams, stadiums, initialTime
                           stadiumText={getStadiumDetailsText(match.stadium_id)}
                           timeText={timeFmt.format(getUtcDate(match.local_date, match.stadium_id))}
                           now={now}
-                          realKickoffMs={kickoffAnchors[match.id]}
+                          realKickoffMs={match.live_since ?? kickoffAnchors[match.id]}
                           simulatorEnabled={simulatorEnabled}
                           onSelectTeam={handleSelectTeam}
                           onShowGroup={setSelectedGroupModal}
