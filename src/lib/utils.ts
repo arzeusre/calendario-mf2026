@@ -138,19 +138,29 @@ export function getElapsedLabel(timeElapsed: string): string | null {
   return null; // "live" or unknown markers: no extra detail beyond "En Vivo"
 }
 
-// Match minute for the live badge. Prefers what the API reports; when it
-// only says "live", estimates from wall-clock time since kickoff
-// (subtracting the ~17 min halftime break after minute 45)
-export function getLiveMinuteEstimate(timeElapsed: string, kickoffMs: number, nowMs: number): string | null {
+// Match minute for the live badge. Prefers what the provider reports
+// (exact minute, halftime, extra time, penalties); only when it just says
+// "live" we estimate from an anchor. The anchor is the REAL kickoff moment
+// when we captured it (the notstarted→live transition); otherwise the
+// scheduled kickoff. With a real anchor the minute is accurate to ~1 min,
+// so we drop the "≈"; with the scheduled fallback we keep it.
+export function getLiveMinuteEstimate(
+  timeElapsed: string,
+  anchorMs: number,
+  nowMs: number,
+  realAnchor = false
+): string | null {
   const reported = getElapsedLabel(timeElapsed);
   if (reported) return reported;
-  if (nowMs <= 0 || kickoffMs <= 0) return null;
-  const mins = Math.floor((nowMs - kickoffMs) / 60000);
-  if (mins < 1) return '1′';
-  if (mins <= 45) return `≈${mins}′`;
-  if (mins <= 62) return '45+′ · Descanso';
-  if (mins <= 112) return `≈${Math.min(90, mins - 17)}′`;
-  return '90+′';
+  if (nowMs <= 0 || anchorMs <= 0) return null;
+
+  const mins = Math.floor((nowMs - anchorMs) / 60000);
+  const pfx = realAnchor ? '' : '≈';
+  if (mins < 1) return `${pfx}1′`;
+  if (mins <= 45) return `${pfx}${mins}′`;
+  if (mins <= 60) return `${pfx}45+′`;                          // 1.ª parte + añadido / inicio del descanso
+  if (mins <= 120) return `${pfx}${Math.min(90, mins - 15)}′`;  // 2.ª parte (descontado el descanso ~15')
+  return `${pfx}90+′`;
 }
 
 // Translate knockout placeholder labels ("Winner Match 74", "Runner-up Group A",

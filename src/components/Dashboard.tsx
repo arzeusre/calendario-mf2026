@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { CalendarSearch, ChevronDown, ChevronUp, Clock, Moon, SlidersHorizontal, Sun, Trophy } from 'lucide-react';
 import { Match, Team, Stadium, CITY_NAMES_ES, getUtcDate } from '@/lib/utils';
 import { GROUP_COLORS } from '@/lib/constants';
@@ -74,6 +74,29 @@ const subscribeNow = (listener: () => void) => {
 const getNowSnapshot = () => nowSnapshot;
 const getServerNow = () => 0;
 
+// Real kickoff anchors: timestamp captured when a match is first observed
+// flipping from "notstarted" to live. Persisted so a page refresh during the
+// match keeps the accurate clock. Keyed by match id.
+const KICKOFFS_STORAGE_KEY = 'wc2026-kickoffs';
+
+function loadKickoffAnchors(): Record<string, number> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = window.localStorage.getItem(KICKOFFS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveKickoffAnchors(anchors: Record<string, number>): void {
+  try {
+    window.localStorage.setItem(KICKOFFS_STORAGE_KEY, JSON.stringify(anchors));
+  } catch {
+    /* ignore quota / privacy-mode errors */
+  }
+}
+
 export default function Dashboard({ initialMatches, teams, stadiums, initialTimeZone, simulatorEnabled }: DashboardProps) {
   const [matches, setMatches] = useState<Match[]>(initialMatches);
   const [loading, setLoading] = useState(false);
@@ -98,6 +121,37 @@ export default function Dashboard({ initialMatches, teams, stadiums, initialTime
   // Ticks every 10 s; 0 during SSR/hydration
   const now = useSyncExternalStore(subscribeNow, getNowSnapshot, getServerNow);
 
+  // Capture each match's real kickoff the moment it goes notstarted→live, so
+  // the live minute is anchored to when play actually started (handles late
+  // kickoffs). Detected inside fetchData when fresh data arrives; the baseline
+  // is seeded from the server-rendered matches. localStorage keeps anchors
+  // across refreshes.
+  const [kickoffAnchors, setKickoffAnchors] = useState<Record<string, number>>(loadKickoffAnchors);
+  const prevStatusRef = useRef<Record<string, string>>(
+    Object.fromEntries(initialMatches.map(m => [m.id, m.time_elapsed]))
+  );
+
+  const captureKickoffs = (incoming: Match[]) => {
+    const prev = prevStatusRef.current;
+    const captured: Record<string, number> = {};
+    for (const m of incoming) {
+      const wasNotStarted = prev[m.id] === 'notstarted';
+      const isLiveNow = m.time_elapsed !== 'notstarted' && m.finished !== 'TRUE';
+      if (wasNotStarted && isLiveNow) captured[m.id] = Date.now();
+      prev[m.id] = m.time_elapsed;
+    }
+    if (Object.keys(captured).length > 0) {
+      setKickoffAnchors(prevAnchors => {
+        const merged = { ...prevAnchors };
+        for (const [id, ts] of Object.entries(captured)) {
+          if (merged[id] == null) merged[id] = ts;
+        }
+        saveKickoffAnchors(merged);
+        return merged;
+      });
+    }
+  };
+
   const toggleTheme = () => {
     const nowDark = document.documentElement.classList.toggle('dark-theme');
     localStorage.setItem('theme', nowDark ? 'dark' : 'light');
@@ -113,6 +167,7 @@ export default function Dashboard({ initialMatches, teams, stadiums, initialTime
       const res = await fetch(`/api/matches${forceRefresh ? '?refresh=true' : ''}`);
       if (!res.ok) throw new Error('Error al cargar la información del servidor');
       const data = await res.json();
+      captureKickoffs(data.matches);
       setMatches(data.matches);
     } catch (err) {
       if (!silent) setError(err instanceof Error ? err.message : 'Error desconocido');
@@ -440,6 +495,7 @@ export default function Dashboard({ initialMatches, teams, stadiums, initialTime
                           stadiumText={getStadiumDetailsText(match.stadium_id)}
                           timeText={timeFmt.format(getUtcDate(match.local_date, match.stadium_id))}
                           now={now}
+                          realKickoffMs={kickoffAnchors[match.id]}
                           simulatorEnabled={simulatorEnabled}
                           onSelectTeam={handleSelectTeam}
                           onShowGroup={setSelectedGroupModal}

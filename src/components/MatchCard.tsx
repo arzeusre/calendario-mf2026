@@ -12,6 +12,7 @@ interface MatchCardProps {
   stadiumText: string;
   timeText: string;
   now: number; // shared wall clock (0 during SSR)
+  realKickoffMs?: number; // captured kickoff for an accurate live minute
   simulatorEnabled: boolean;
   onSelectTeam: (teamId: string) => void;
   onShowGroup: (group: string) => void;
@@ -19,7 +20,7 @@ interface MatchCardProps {
 }
 
 export default function MatchCard({
-  match, homeTeam, awayTeam, stadiumText, timeText, now,
+  match, homeTeam, awayTeam, stadiumText, timeText, now, realKickoffMs,
   simulatorEnabled, onSelectTeam, onShowGroup, onSimulate
 }: MatchCardProps) {
   const isFinished = match.finished === 'TRUE';
@@ -38,10 +39,13 @@ export default function MatchCard({
   // The reverse lag: the source forgot to close the match (stuck "live"
   // hours after kickoff) — stop claiming it's in progress
   const staleLive = isLive && minsSinceKickoff !== null && minsSinceKickoff > 160;
+  // Prefer the captured real kickoff (accurate, no "≈") over the scheduled one
+  const anchorMs = realKickoffMs ?? kickoffMs;
+  const realAnchor = realKickoffMs != null;
   const liveDetail = isLive
-    ? getLiveMinuteEstimate(match.time_elapsed, kickoffMs, now)
+    ? getLiveMinuteEstimate(match.time_elapsed, anchorMs, now, realAnchor)
     : estimatedLive
-      ? getLiveMinuteEstimate('live', kickoffMs, now)
+      ? getLiveMinuteEstimate('live', anchorMs, now, realAnchor)
       : null;
 
   const homeLabelName = homeTeam && match.home_team_id !== '0'
